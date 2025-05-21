@@ -1,0 +1,2 @@
+org.springframework.context.ApplicationListener=\
+    shin_nc.psb_test.configuration.DotenvApplicationListener
