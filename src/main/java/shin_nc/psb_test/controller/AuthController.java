@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import shin_nc.psb_test.dto.LoginRequest;
+import shin_nc.psb_test.dto.LoginResponse;
 import shin_nc.psb_test.dto.RegisterRequest;
 import shin_nc.psb_test.dto.RegisterResponse;
 import shin_nc.psb_test.dto.WebResponse;
@@ -22,5 +24,11 @@ public class AuthController {
     public WebResponse<RegisterResponse> register(@RequestBody RegisterRequest request) {
         RegisterResponse registerResponse = authService.register(request);
         return WebResponse.<RegisterResponse>builder().data(registerResponse).build();
+    }
+
+    @PostMapping("/login")
+    public WebResponse<LoginResponse> login(@RequestBody LoginRequest request) {
+        LoginResponse loginResponse = authService.login(request);
+        return WebResponse.<LoginResponse>builder().data(loginResponse).build();
     }
 }

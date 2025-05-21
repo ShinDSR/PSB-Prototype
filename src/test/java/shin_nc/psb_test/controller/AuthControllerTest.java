@@ -6,17 +6,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import shin_nc.psb_test.dto.LoginRequest;
+import shin_nc.psb_test.dto.LoginResponse;
 import shin_nc.psb_test.dto.RegisterRequest;
 import shin_nc.psb_test.dto.RegisterResponse;
 import shin_nc.psb_test.dto.WebResponse;
 import shin_nc.psb_test.entity.AppGender;
 import shin_nc.psb_test.entity.AppReligion;
+import shin_nc.psb_test.entity.AppRole;
 import shin_nc.psb_test.entity.Biodata;
+import shin_nc.psb_test.entity.User;
 import shin_nc.psb_test.repository.BiodataRepository;
 import shin_nc.psb_test.repository.RegistrationRepository;
 import shin_nc.psb_test.repository.UserRepository;
@@ -42,6 +47,9 @@ public class AuthControllerTest {
 
     @Autowired
     private RegistrationRepository registrationRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -155,6 +163,111 @@ public class AuthControllerTest {
                 status().isBadRequest()
         ).andDo(result -> {
             WebResponse<RegisterResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+            // Pastikan ada error
+            assertNotNull(response.getErrors());
+        });
+    }
+
+
+    @Test
+    void loginSuccess() throws Exception {
+        User user = new User();
+        user.setEmail("test001@psb.local");
+        user.setPassword(passwordEncoder.encode("password"));
+        user.setRole(AppRole.USER);
+        userRepository.save(user);
+
+        LoginRequest request = new LoginRequest();
+        request.setEmail("test001@psb.local");
+        request.setPassword("password");
+        mockMvc.perform(
+                post("/auth/login")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+            WebResponse<LoginResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+            // Pastikan tidak ada error
+            assertNull(response.getErrors());
+
+            // Pastikan token tidak null
+            assertNotNull(response.getData().getToken());
+        });
+    }
+
+    @Test
+    void loginEmailNotFound() throws Exception {
+        LoginRequest request = new LoginRequest();
+        request.setEmail("test001@psb.local");
+        request.setPassword("password");
+
+        mockMvc.perform(
+                post("/auth/login")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+            WebResponse<LoginResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+            // Pastikan ada error
+            assertNotNull(response.getErrors());
+        });
+    }
+
+    @Test
+    void loginWrongPassword() throws Exception {
+        User user = new User();
+        user.setEmail("test001@psb.local");
+        user.setPassword(passwordEncoder.encode("password"));
+        user.setRole(AppRole.USER);
+        userRepository.save(user);
+        
+        LoginRequest request = new LoginRequest();
+        request.setEmail("test001@psb.local");
+        request.setPassword("wrongpassword");
+
+        mockMvc.perform(
+                post("/auth/login")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+            WebResponse<LoginResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+            // Pastikan ada error
+            assertNotNull(response.getErrors());
+        });
+    }
+
+    @Test
+    void loginBadRequest() throws Exception {
+        User user = new User();
+        user.setEmail("test001@psb.local");
+        user.setPassword(passwordEncoder.encode("password"));
+        user.setRole(AppRole.USER);
+        userRepository.save(user);
+
+        LoginRequest request = new LoginRequest();
+        request.setEmail("");
+        request.setPassword("");
+
+        mockMvc.perform(
+                post("/auth/login")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+        ).andExpectAll(
+                status().isBadRequest()
+        ).andDo(result -> {
+            WebResponse<LoginResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
             });
             // Pastikan ada error
             assertNotNull(response.getErrors());

@@ -2,12 +2,13 @@ package shin_nc.psb_test.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.transaction.Transactional;
+import shin_nc.psb_test.dto.LoginRequest;
+import shin_nc.psb_test.dto.LoginResponse;
 import shin_nc.psb_test.dto.RegisterRequest;
 import shin_nc.psb_test.dto.RegisterResponse;
 import shin_nc.psb_test.entity.AppGender;
@@ -37,9 +38,6 @@ public class AuthService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
 
     @Transactional
     public RegisterResponse register(RegisterRequest request) {
@@ -105,6 +103,28 @@ public class AuthService {
             sb.append(chars.charAt(random.nextInt(chars.length())));
         }
         return sb.toString();
+    }
+
+    @Transactional
+    public LoginResponse login(LoginRequest request){
+
+        validationService.validate(request);
+
+        // Check if user exists
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
+
+        // Check if password matches
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+        }
+
+        // Generate JWT token
+        String jwtToken = jwtService.generateToken(user.getEmail());
+
+        return LoginResponse.builder()
+                .token(jwtToken)
+                .build();
     }
 
 }
