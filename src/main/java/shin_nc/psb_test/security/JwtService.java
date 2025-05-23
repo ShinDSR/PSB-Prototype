@@ -19,7 +19,7 @@ public class JwtService {
     private String secret = "40de55f2312a93dca4aaab2384bf2d77ae35f3a84b015914ea2afc9599615b6a01c18fb0f0ae456faf5be1d75859c7b89949e749ace9f9ced228dbb9d08e3bafb840d7f035c1a345b04ba3d321844ecd4b4c70d743b8286185d8b4a1914950dab36fc08d35eb798f51bcc62bf3b7264a4e587f5048fe4d73baef074d2d813ba48365a9175751f2887b5cd7ed9771e666e3fb6294bde41956080e4c9e5ada5cd6f1d99acb6ad955a229aed5947e935e1bce99acd29b33349a6d436941e8c688040e383b9145c90de14befa4bc9f9d2cff16921670269520d7b6dca074392a6e6882883b6fabd526736f7f57786d12871278579976a1fbbb05f8777f380af76927";
 
     // @Value("${jwt.expiration}")
-    private long jwtExpiration = 1000 * 60 * 60 * 10; // 10 hours
+    private long jwtExpiration = 1000 * 60 * 60 * 24; // 24 hours
 
     private Key key;
 
@@ -61,5 +61,9 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody();
         return claimsResolver.apply(claims);
+    }
+
+    public Long tokenExpiredAt(){
+        return System.currentTimeMillis() + jwtExpiration;
     }
 }

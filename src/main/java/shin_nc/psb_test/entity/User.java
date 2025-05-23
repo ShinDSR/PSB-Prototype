@@ -34,6 +34,11 @@ public class User implements UserDetails{
 
     @Column(length = 100 ,nullable = false)
     private String password;
+
+    @Column(unique = true)
+    private String token;
+
+    private Long tokenExpiredAt;
     
     @Enumerated(EnumType.STRING)
     private AppRole role;

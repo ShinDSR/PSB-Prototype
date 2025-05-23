@@ -121,9 +121,16 @@ public class AuthService {
 
         // Generate JWT token
         String jwtToken = jwtService.generateToken(user.getEmail());
+        Long tokenExpiredAt = jwtService.tokenExpiredAt();
+
+        // Update user token and token expiration
+        user.setToken(jwtToken);
+        user.setTokenExpiredAt(tokenExpiredAt);
+        userRepository.save(user);
 
         return LoginResponse.builder()
                 .token(jwtToken)
+                .tokenExpiredAt(tokenExpiredAt)
                 .build();
     }
 
