@@ -19,7 +19,7 @@ import shin_nc.psb_test.entity.Registration;
 import shin_nc.psb_test.entity.User;
 import shin_nc.psb_test.repository.BiodataRepository;
 import shin_nc.psb_test.repository.UserRepository;
-import shin_nc.psb_test.security.JwtService;
+// import shin_nc.psb_test.security.JwtService;
 
 @Service
 public class AuthService {
@@ -33,8 +33,8 @@ public class AuthService {
     @Autowired
     private BiodataRepository biodataRepository;
 
-    @Autowired
-    private JwtService jwtService;
+    // @Autowired
+    // private JwtService jwtService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -90,7 +90,7 @@ public class AuthService {
 
         // Return response
         return RegisterResponse.builder()
-                .email(generatedEmail)
+                .email(user.getEmail())
                 .password(rawPassword)
                 .build();
     }
@@ -120,18 +120,35 @@ public class AuthService {
         }
 
         // Generate JWT token
-        String jwtToken = jwtService.generateToken(user.getEmail());
-        Long tokenExpiredAt = jwtService.tokenExpiredAt();
+        // String jwtToken = jwtService.generateToken(user.getEmail());
+        // Long tokenExpiredAt = jwtService.tokenExpiredAt();
 
+        // Generate random token
+        String token = generateRandomToken(150);
+        
         // Update user token and token expiration
-        user.setToken(jwtToken);
-        user.setTokenExpiredAt(tokenExpiredAt);
+        user.setToken(token);
+        user.setTokenExpiredAt(next1Day());
         userRepository.save(user);
 
         return LoginResponse.builder()
-                .token(jwtToken)
-                .tokenExpiredAt(tokenExpiredAt)
+                .token(user.getToken())
+                .tokenExpiredAt(user.getTokenExpiredAt())
                 .build();
+    }
+
+    private String generateRandomToken(int length) {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder sb = new StringBuilder();
+        java.util.Random random = new java.util.Random();
+        for (int i = 0; i < length; i++) {
+            sb.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return sb.toString();
+    }
+
+    private Long next1Day() {
+        return System.currentTimeMillis() + 1000 * 60 * 60 * 24; // 1 day
     }
 
 }
