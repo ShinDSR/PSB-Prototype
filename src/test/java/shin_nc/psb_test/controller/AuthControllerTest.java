@@ -61,6 +61,7 @@ public class AuthControllerTest {
         registrationRepository.deleteAll();
     }
 
+    //========================= Register Tests =========================
     @Test
     void testRegisterSuccess() throws Exception {
         RegisterRequest request = new RegisterRequest();
@@ -170,6 +171,7 @@ public class AuthControllerTest {
     }
 
 
+    //========================= Login Tests =========================
     @Test
     void loginSuccess() throws Exception {
         User user = new User();
@@ -274,4 +276,68 @@ public class AuthControllerTest {
         });
     }
 
+
+    //========================= Logout Tests =========================
+    @Test
+    void logoutSuccess() throws Exception {
+        
+        User user = new User();
+        user.setEmail("test01@psb.local");
+        user.setPassword(passwordEncoder.encode("password"));
+        user.setRole(AppRole.USER);
+        user.setToken("valid_token");
+        user.setTokenExpiredAt(System.currentTimeMillis() + 1000 * 60 * 60 * 24); // 1 day expiration
+        userRepository.save(user);
+
+        mockMvc.perform(
+                delete("/auth/logout")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer valid_token")
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+            WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+            assertNull(response.getErrors());
+        });
+    }
+    
+    @Test
+    void logoutFailedInvalidToken() throws Exception {
+        
+        User user = new User();
+        user.setEmail("test01@psb.local");
+        user.setPassword(passwordEncoder.encode("password"));
+        user.setRole(AppRole.USER);
+        user.setToken("valid_token");
+        user.setTokenExpiredAt(System.currentTimeMillis() + 1000 * 60 * 60 * 24); // 1 day expiration
+        userRepository.save(user);
+
+        mockMvc.perform(
+                delete("/auth/logout")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer invalid_token")
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+            WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+            assertNotNull(response.getErrors());
+        });
+    }
+
+    @Test
+    void logoutFailedTokenNotSend() throws Exception {
+        
+        mockMvc.perform(
+                delete("/auth/logout")
+                        .accept(MediaType.APPLICATION_JSON)
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+            WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+            assertNotNull(response.getErrors());
+        });
+    }
 }
