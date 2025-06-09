@@ -17,8 +17,6 @@ import shin_nc.psb_test.dto.UserUpdateRequest;
 import shin_nc.psb_test.dto.WebResponse;
 import shin_nc.psb_test.entity.AppRole;
 import shin_nc.psb_test.entity.User;
-import shin_nc.psb_test.repository.BiodataRepository;
-import shin_nc.psb_test.repository.RegistrationRepository;
 import shin_nc.psb_test.repository.UserRepository;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -48,6 +46,7 @@ public class UserControllerTest {
         userRepository.deleteAll();
     }
 
+    //========================= Get Current User Tests =========================
     @Test
     void testGetCurrentUserSucces() throws Exception {
 
@@ -140,6 +139,8 @@ public class UserControllerTest {
         });
     }
 
+
+    //========================= Update Current User Tests =========================
     @Test
     void testUpdateCurrentUserSucces() throws Exception {
 
