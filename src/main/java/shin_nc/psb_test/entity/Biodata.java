@@ -46,7 +46,7 @@ public class Biodata {
     @Column(length = 15, nullable = false)
     private String phoneNumber;
 
-    @Column(length = 20, nullable = false, unique = true)
+    @Column(length = 10, nullable = false, unique = true)
     private String nisn;
 
     @Column(length = 100, nullable = false)

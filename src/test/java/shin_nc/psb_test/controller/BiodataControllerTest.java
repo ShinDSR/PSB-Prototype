@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import shin_nc.psb_test.dto.BiodataResponse;
+import shin_nc.psb_test.dto.BiodataUpdateRequest;
 import shin_nc.psb_test.dto.WebResponse;
 import shin_nc.psb_test.entity.AppGender;
 import shin_nc.psb_test.entity.AppReligion;
@@ -177,6 +178,203 @@ public class BiodataControllerTest {
             assertEquals("1234567890", response.getData().getPhoneNumber());
             assertEquals("123456789", response.getData().getNisn());
             assertEquals("Test School", response.getData().getSchoolFrom());
+        });
+    }
+
+
+    //========================= Update Current Biodata Tests =========================
+    @Test
+    void testUpdateCurrentBiodataTokenNotSend() throws Exception {
+        User user = userRepository.findByEmail("test01@psb.local").orElseThrow();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date birthDate = sdf.parse("2000-01-01");
+
+        Biodata biodata = new Biodata();
+        biodata.setName("Test User");
+        biodata.setGender(AppGender.L);
+        biodata.setReligion(AppReligion.ISLAM);
+        biodata.setPlaceOfBirth("Test City");
+        biodata.setBirthDate(birthDate);
+        biodata.setAddress("Test Address");
+        biodata.setPhoneNumber("1234567890");
+        biodata.setNisn("123456789");
+        biodata.setSchoolFrom("Test School");
+        biodata.setUser(user);
+        biodataRepository.save(biodata);
+
+        BiodataUpdateRequest request = new BiodataUpdateRequest();
+        request.setName("Updated User");
+        request.setGender("P");
+        request.setReligion("KRISTEN");
+        request.setPlaceOfBirth("Updated City");
+        request.setBirthDate("2001-01-01");
+        request.setAddress("Updated Address");
+        request.setPhoneNumber("0987654321");
+        request.setNisn("987654321");
+        request.setSchoolFrom("Updated School");
+
+        mockMvc.perform(
+            put("/biodata/current")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+        ).andExpectAll(
+            status().isUnauthorized()
+        ).andDo(result -> {
+            WebResponse<BiodataResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertNotNull(response.getErrors());
+        });
+    }
+
+    @Test
+    void testUpdateCurrentBiodataInvalidToken() throws Exception {
+        User user = userRepository.findByEmail("test01@psb.local").orElseThrow();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date birthDate = sdf.parse("2000-01-01");
+
+        Biodata biodata = new Biodata();
+        biodata.setName("Test User");
+        biodata.setGender(AppGender.L);
+        biodata.setReligion(AppReligion.ISLAM);
+        biodata.setPlaceOfBirth("Test City");
+        biodata.setBirthDate(birthDate);
+        biodata.setAddress("Test Address");
+        biodata.setPhoneNumber("1234567890");
+        biodata.setNisn("123456789");
+        biodata.setSchoolFrom("Test School");
+        biodata.setUser(user);
+        biodataRepository.save(biodata);
+
+        BiodataUpdateRequest request = new BiodataUpdateRequest();
+        request.setName("Updated User");
+        request.setGender("P");
+        request.setReligion("KRISTEN");
+        request.setPlaceOfBirth("Updated City");
+        request.setBirthDate("2001-01-01");
+        request.setAddress("Updated Address");
+        request.setPhoneNumber("0987654321");
+        request.setNisn("987654321");
+        request.setSchoolFrom("Updated School");
+
+        mockMvc.perform(
+            put("/biodata/current")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer invalid_token")
+        ).andExpectAll(
+            status().isUnauthorized()
+        ).andDo(result -> {
+            WebResponse<BiodataResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertNotNull(response.getErrors());
+        });
+    }
+
+    @Test
+    void testUpdateCurrentBiodataBadRequest() throws Exception {
+        User user = userRepository.findByEmail("test01@psb.local").orElseThrow();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date birthDate = sdf.parse("2000-01-01");
+
+        Biodata biodata = new Biodata();
+        biodata.setName("Test User");
+        biodata.setGender(AppGender.L);
+        biodata.setReligion(AppReligion.ISLAM);
+        biodata.setPlaceOfBirth("Test City");
+        biodata.setBirthDate(birthDate);
+        biodata.setAddress("Test Address");
+        biodata.setPhoneNumber("1234567890");
+        biodata.setNisn("123456789");
+        biodata.setSchoolFrom("Test School");
+        biodata.setUser(user);
+        biodataRepository.save(biodata);
+
+        BiodataUpdateRequest request = new BiodataUpdateRequest();
+        request.setName("");
+        request.setGender("");
+        request.setReligion("");
+        request.setPlaceOfBirth("");
+        request.setBirthDate("");
+        request.setAddress("");
+        request.setPhoneNumber("");
+        request.setNisn("");
+        request.setSchoolFrom("");
+
+        mockMvc.perform(
+            put("/biodata/current")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer valid_token")
+                .content(objectMapper.writeValueAsString(request))
+        ).andExpectAll(
+            status().isBadRequest()
+        ).andDo(result -> {
+            WebResponse<BiodataResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertNotNull(response.getErrors());
+        });
+    }
+
+    @Test
+    void testUpdateCurrentBiodataSuccess() throws Exception {
+        User user = userRepository.findByEmail("test01@psb.local").orElseThrow();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date birthDate = sdf.parse("2000-01-01");
+
+        Biodata biodata = new Biodata();
+        biodata.setName("Test User");
+        biodata.setGender(AppGender.L);
+        biodata.setReligion(AppReligion.ISLAM);
+        biodata.setPlaceOfBirth("Test City");
+        biodata.setBirthDate(birthDate);
+        biodata.setAddress("Test Address");
+        biodata.setPhoneNumber("1234567890");
+        biodata.setNisn("123456789");
+        biodata.setSchoolFrom("Test School");
+        biodata.setUser(user);
+        biodataRepository.save(biodata);
+
+        BiodataUpdateRequest request = new BiodataUpdateRequest();
+        request.setName("Updated User");
+        request.setGender("P");
+        request.setReligion("KRISTEN");
+        request.setPlaceOfBirth("Updated City");
+        request.setBirthDate("2001-01-01");
+        request.setAddress("Updated Address");
+        request.setPhoneNumber("0987654321");
+        request.setNisn("9876543214");
+        request.setSchoolFrom("Updated School");
+
+        mockMvc.perform(
+            put("/biodata/current")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer valid_token")
+                .content(objectMapper.writeValueAsString(request))
+        ).andExpectAll(
+            status().isOk()
+        ).andDo(result -> {
+            WebResponse<BiodataResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {
+            });
+
+            assertNull(response.getErrors());
+            assertEquals("Updated User", response.getData().getName());
+            assertEquals("P", response.getData().getGender());
+            assertEquals("KRISTEN", response.getData().getReligion());
+            assertEquals("Updated City", response.getData().getPlaceOfBirth());
+            assertEquals("2001-01-01", response.getData().getBirthDate());
+            assertEquals("Updated Address", response.getData().getAddress());
+            assertEquals("0987654321", response.getData().getPhoneNumber());
+            assertEquals("9876543214", response.getData().getNisn());
+            assertEquals("Updated School", response.getData().getSchoolFrom());
+            
         });
     }
 

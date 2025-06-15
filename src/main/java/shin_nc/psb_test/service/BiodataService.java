@@ -7,6 +7,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import shin_nc.psb_test.dto.BiodataResponse;
+import shin_nc.psb_test.dto.BiodataUpdateRequest;
+import shin_nc.psb_test.entity.AppGender;
+import shin_nc.psb_test.entity.AppReligion;
+import shin_nc.psb_test.entity.Biodata;
 import shin_nc.psb_test.entity.User;
 import shin_nc.psb_test.repository.BiodataRepository;
 
@@ -21,21 +25,45 @@ public class BiodataService {
 
     @Transactional(readOnly = true)
     public BiodataResponse getCurrentBiodata(User user) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Biodata biodata = biodataRepository.findByUser(user)
+                .orElseThrow(() -> new IllegalArgumentException("Biodata not found for user: " + user.getEmail()));
 
-        return BiodataResponse.builder()
-                .id(user.getBiodata().getId())
-                .name(user.getBiodata().getName())
-                .gender(user.getBiodata().getGender().name())
-                .religion(user.getBiodata().getReligion().name())
-                .placeOfBirth(user.getBiodata().getPlaceOfBirth())
-                .birthDate(dateFormat.format(user.getBiodata().getBirthDate()))
-                .address(user.getBiodata().getAddress())
-                .phoneNumber(user.getBiodata().getPhoneNumber())
-                .nisn(user.getBiodata().getNisn())
-                .schoolFrom(user.getBiodata().getSchoolFrom())
-                .build();
+        return toBiodataResponse(biodata);
     }
 
+    private BiodataResponse toBiodataResponse(Biodata biodata) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        return BiodataResponse.builder()
+                .id(biodata.getId())
+                .name(biodata.getName())
+                .gender(biodata.getGender().name())
+                .religion(biodata.getReligion().name())
+                .placeOfBirth(biodata.getPlaceOfBirth())
+                .birthDate(dateFormat.format(biodata.getBirthDate()))
+                .address(biodata.getAddress())
+                .phoneNumber(biodata.getPhoneNumber())
+                .nisn(biodata.getNisn())
+                .schoolFrom(biodata.getSchoolFrom())
+                .build();
+    }
     
+    @Transactional
+    public BiodataResponse updateCurrentBiodata(User user, BiodataUpdateRequest request){
+        validationService.validate(request);
+
+        Biodata biodata = biodataRepository.findByUser(user)
+                .orElseThrow(() -> new IllegalArgumentException("Biodata not found for user: " + user.getEmail()));
+
+        biodata.setName(request.getName());
+        biodata.setGender(AppGender.valueOf(request.getGender().toUpperCase()));
+        biodata.setReligion(AppReligion.valueOf(request.getReligion().toUpperCase()));
+        biodata.setPlaceOfBirth(request.getPlaceOfBirth());
+        biodata.setBirthDate(java.sql.Date.valueOf(request.getBirthDate()));
+        biodata.setAddress(request.getAddress());
+        biodata.setPhoneNumber(request.getPhoneNumber());
+        biodata.setNisn(request.getNisn());
+        biodata.setSchoolFrom(request.getSchoolFrom());
+        biodataRepository.save(biodata);
+        return toBiodataResponse(biodata);
+    }
 }
