@@ -24,18 +24,18 @@ public class BiodataController {
     private BiodataService biodataService;
 
     @GetMapping(path = "/current", produces = MediaType.APPLICATION_JSON_VALUE)
-    public WebResponse<BiodataResponse> getCurrentBiodata(Authentication authentication) {
+    public WebResponse<BiodataResponse> getCurrent(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        User user = (User) userDetails; // atau casting sesuai implementasi kamu
-        BiodataResponse biodataResponse = biodataService.getCurrentBiodata(user);
+        User user = (User) userDetails;
+        BiodataResponse biodataResponse = biodataService.getCurrent(user);
         return WebResponse.<BiodataResponse>builder().data(biodataResponse).build();
     }
 
     @PutMapping(path = "/current", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public WebResponse<BiodataResponse> updateCurrentBiodata(Authentication authentication, @RequestBody BiodataUpdateRequest request) {
+    public WebResponse<BiodataResponse> updateCurrent(Authentication authentication, @RequestBody BiodataUpdateRequest request) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        User user = (User) userDetails; // atau casting sesuai implementasi kamu
-        BiodataResponse updatedBiodata = biodataService.updateCurrentBiodata(user, request);
+        User user = (User) userDetails;
+        BiodataResponse updatedBiodata = biodataService.updateCurrent(user, request);
         return WebResponse.<BiodataResponse>builder().data(updatedBiodata).build();
     }
 }

@@ -82,8 +82,8 @@ public class AuthService {
         Registration registration = new Registration();
         registration.setRegistrationDate(java.time.LocalDate.now());
         registration.setStatus("pending");
-        registration.setBiodata(biodata);
-        biodata.setRegistration(registration);
+        registration.setUser(user);
+        user.setRegistration(registration);
 
         // Save all
         userRepository.save(user);

@@ -27,7 +27,7 @@ public class Registration {
     private String status = "pending";
 
     @OneToOne
-    @JoinColumn(name = "biodata_id", referencedColumnName = "id")
-    private Biodata biodata;
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
     
 }

@@ -24,18 +24,18 @@ public class UserController {
     private UserService userService;
 
     @GetMapping(path = "/current", produces = MediaType.APPLICATION_JSON_VALUE)
-    public WebResponse<UserResponse> getCurrentUser(Authentication authentication) {
+    public WebResponse<UserResponse> getCurrent(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        User user = (User) userDetails; // atau casting sesuai implementasi kamu
-        UserResponse userResponse = userService.getCurrentUser(user);
+        User user = (User) userDetails;
+        UserResponse userResponse = userService.getCurrent(user);
         return WebResponse.<UserResponse>builder().data(userResponse).build();
     }
 
     @PatchMapping(path = "/current", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public WebResponse<UserResponse> updateCurrentUser(Authentication authentication,@RequestBody UserUpdateRequest request) {
+    public WebResponse<UserResponse> updateCurrent(Authentication authentication, @RequestBody UserUpdateRequest request) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        User user = (User) userDetails; // atau casting sesuai implementasi kamu
-        UserResponse userResponse = userService.updateCurrentUser(user, request);
+        User user = (User) userDetails;
+        UserResponse userResponse = userService.updateCurrent(user, request);
         return WebResponse.<UserResponse>builder().data(userResponse).build();
     }
 }

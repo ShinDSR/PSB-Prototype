@@ -13,7 +13,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "parents")
-public class Parent {
+public class Parents {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,6 +38,6 @@ public class Parent {
     private String motherPhoneNumber;
 
     @OneToOne
-    @JoinColumn(name = "biodata_id", referencedColumnName = "id")
-    private Biodata biodata;
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
 }

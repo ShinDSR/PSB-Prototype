@@ -3,8 +3,10 @@ package shin_nc.psb_test.service;
 import java.text.SimpleDateFormat;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import shin_nc.psb_test.dto.BiodataResponse;
 import shin_nc.psb_test.dto.BiodataUpdateRequest;
@@ -24,9 +26,9 @@ public class BiodataService {
     private ValidationService validationService;
 
     @Transactional(readOnly = true)
-    public BiodataResponse getCurrentBiodata(User user) {
+    public BiodataResponse getCurrent(User user) {
         Biodata biodata = biodataRepository.findByUser(user)
-                .orElseThrow(() -> new IllegalArgumentException("Biodata not found for user: " + user.getEmail()));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Biodata not found"));
 
         return toBiodataResponse(biodata);
     }
@@ -48,11 +50,11 @@ public class BiodataService {
     }
     
     @Transactional
-    public BiodataResponse updateCurrentBiodata(User user, BiodataUpdateRequest request){
+    public BiodataResponse updateCurrent(User user, BiodataUpdateRequest request){
         validationService.validate(request);
 
         Biodata biodata = biodataRepository.findByUser(user)
-                .orElseThrow(() -> new IllegalArgumentException("Biodata not found for user: " + user.getEmail()));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Biodata not found"));
 
         biodata.setName(request.getName());
         biodata.setGender(AppGender.valueOf(request.getGender().toUpperCase()));

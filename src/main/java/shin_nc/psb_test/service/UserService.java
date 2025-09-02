@@ -24,14 +24,14 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public UserResponse getCurrentUser(User user) {
+    public UserResponse getCurrent(User user) {
         return UserResponse.builder()
                 .email(user.getEmail())
                 .build();
     }
 
     @Transactional
-    public UserResponse updateCurrentUser(User user, UserUpdateRequest request) {
+    public UserResponse updateCurrent(User user, UserUpdateRequest request) {
         validationService.validate(request);
 
         if (Objects.nonNull(request.getPassword())) {
